@@ -26,10 +26,11 @@ app.register_blueprint(views, url_prefix='/')
 """handle login"""
 login_manager = LoginManager(app)
 login_manager.login_view = 'auth.login'
-
+login_manager.login_message = 'You must be logged in to access this page.'
 """Handle user sessions"""
 @login_manager.user_loader
 def load_user(user_id):
+    from models.user import User
     """load user details from the database"""
     return User.query.get(int(user_id))
 
