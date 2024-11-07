@@ -1,5 +1,5 @@
-"""Register the auth blueprint."""
 from flask import Blueprint
 
+auth = Blueprint('auth', __name__, url_prefix='/')
 
-auth = Blueprint('auth', __name__)
+from .routes import *
