@@ -19,4 +19,4 @@ def model_to_json(obj):
             data[field] = value
         except TypeError:
             data[field] = None
-    return json.dumps(data)
+    return data
