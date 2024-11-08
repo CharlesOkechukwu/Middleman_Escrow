@@ -10,10 +10,11 @@ export default {
 			colors: {
 				pry: {
 					DEFAULT: '#0057B7',
+					light: '#DFEEF31F'
 					// foreground: 'hsl(var(--primary-foreground))'
 				},
 				'pry-black': '#333333',
-
+				'gray': '#F4F4F4'
 			},
 			spacing: {
 				'1197': '1197px'

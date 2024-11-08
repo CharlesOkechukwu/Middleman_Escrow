@@ -18,12 +18,12 @@ const MobileNav: React.FC = () => {
         <SheetTrigger>
           <Menu />
         </SheetTrigger>
-        <SheetContent className='bg-white'>
+        <SheetContent className='bg-white w-[300px]'>
           <SheetHeader>
             <SheetTitle>
               <img src={logo} alt="company's logo" />
             </SheetTitle>
-            <SheetDescription className='pl-2 pt-4'>
+            <SheetDescription className='pt-4 block'>
               {
                 links.map(link => (
                   <NavLink to={link.path} key={link.id} className={`block py-3 ${link.path === pathname ? 'text-pry font-semibold' : 'text-pry-black font-normal'}`}>

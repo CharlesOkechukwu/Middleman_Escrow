@@ -8,7 +8,7 @@ import { NavLink } from 'react-router-dom';
 
 const HeroSection: React.FC = () => {
   return (
-    <section className='flex w-full gapx-x-[27px] justify-center xl:justify-between h-[516px]'>
+    <section className='flex w-full gapx-x-[27px] h-full justify-center xl:justify-between lg:h-[516px]'>
       <aside className='w-full lg:w-[742px] h-full'>
         <div>
           <h1 className='text-pry text-center xl:text-start font-semibold text-xl lg:text-[70px] lg:leading-[84px] lg:tracking-tighter'>
