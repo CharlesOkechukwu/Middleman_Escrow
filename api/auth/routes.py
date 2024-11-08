@@ -51,4 +51,11 @@ def login():
     
     user = model_to_json(user)
     session["logged_in"] = True
-    return jsonify({'user': user, 'message': 'User logged in successfully'}), 200
+    return jsonify({'id': user.id, 'name': user.name, 'email': user.email, 'message': 'User logged in successfully'}), 200
+
+
+@auth.route('/logout/', methods=['GET'], strict_slashes=False)
+def logout():
+    """logout a user"""
+    session.pop("logged_in", None)
+    return jsonify({'message': 'User logged out successfully'}), 200
