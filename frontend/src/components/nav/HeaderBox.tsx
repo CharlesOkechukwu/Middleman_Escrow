@@ -8,16 +8,13 @@ import { links } from '@/constant/links';
 
 
 
-interface Props {
 
-}
-
-const HeaderBox: React.FC<Props> = (props) => {
+const HeaderBox: React.FC = () => {
 
   const { pathname } = useLocation();
 
   return (
-    <nav className='w-full px-5 xl:px-0 lg:w-[900px] xl:w-[1197px] mx-auto flex items-center justify-between h-[50px mt-[60px]'>
+    <nav className='w-full px-5 xl:px-0 lg:w-[900px] xl:w-1197 mx-auto flex items-center justify-between h-[50px mt-[60px]'>
       <NavLink to='/'>
         <img src={logo} alt="company logo" />
       </NavLink>

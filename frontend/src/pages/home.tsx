@@ -1,3 +1,4 @@
+import HeroSection from '@/components/landing/HeroSection';
 import React from 'react';
 
 interface Props {
@@ -6,9 +7,9 @@ interface Props {
 
 const HomePage: React.FC<Props> = (props) => {
   return (
-    <section>
-      hommie
-    </section>
+    <>
+      <HeroSection />
+    </>
   );
 }
 

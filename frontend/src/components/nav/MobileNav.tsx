@@ -7,11 +7,8 @@ import { links } from '@/constant/links';
 import { Button } from '../ui/button';
 
 
-interface Props {
 
-}
-
-const MobileNav: React.FC<Props> = (props) => {
+const MobileNav: React.FC = () => {
 
   const { pathname } = useLocation();
 
