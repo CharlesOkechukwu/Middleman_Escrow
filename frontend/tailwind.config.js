@@ -18,6 +18,9 @@ export default {
 			},
 			spacing: {
 				'1197': '1197px'
+			},
+			fontSize: {
+				14: '14px'
 			}
 		}
 	},
