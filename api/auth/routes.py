@@ -1,5 +1,6 @@
 """user authentication routes."""
 from flask import jsonify, request, session
+from flask_login import login_user, logout_user
 from . import auth
 from .utils import get_user_by_email, model_to_json
 from api.models import User
@@ -28,7 +29,8 @@ def register():
     db.session.commit()
 
     new_user = model_to_json(new_user)
-    return jsonify({'user': new_user, 'message': "User Created Successfully"}), 201
+    user_data = {'id': new_user['id'], 'name': new_user['name'], 'email': new_user['email']}
+    return jsonify({'user': user_data, 'message': "User Created Successfully"}), 201
 
 
 @auth.route('/login', methods=['POST'], strict_slashes=False)
@@ -49,13 +51,14 @@ def login():
     if not user.validate_password(password):
         return jsonify({'message': 'Incorrect password'}), 400
     
+    login_user(user)
     user = model_to_json(user)
-    session["logged_in"] = True
-    return jsonify({'id': user.id, 'name': user.name, 'email': user.email, 'message': 'User logged in successfully'}), 200
+    print(user['id'])
+    return jsonify({'id': user['id'], 'name': user['name'], 'email': user['email'], 'message': 'User logged in successfully'}), 200
 
 
-@auth.route('/logout/', methods=['GET'], strict_slashes=False)
+@auth.route('/logout/', methods=['POST'], strict_slashes=False)
 def logout():
     """logout a user"""
-    session.pop("logged_in", None)
+    logout_user()
     return jsonify({'message': 'User logged out successfully'}), 200
