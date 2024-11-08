@@ -2,7 +2,7 @@ import React from 'react'
 import { Outlet } from 'react-router-dom'
 import HeaderBox from '../nav/HeaderBox'
 
-export const DefaultLayout = () => {
+export const DefaultLayout: React.FC = () => {
   return (
     <>
       <header className='w-full'>
