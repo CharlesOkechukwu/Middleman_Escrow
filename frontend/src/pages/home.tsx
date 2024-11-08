@@ -1,4 +1,5 @@
 import HeroSection from '@/components/landing/HeroSection';
+import HowItWorks from '@/components/landing/HowItWorks';
 import OurFeatures from '@/components/landing/OurFeatures';
 import React from 'react';
 
@@ -11,6 +12,7 @@ const HomePage: React.FC<Props> = (props) => {
     <>
       <HeroSection />
       <OurFeatures />
+      <HowItWorks />
     </>
   );
 }
