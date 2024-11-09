@@ -1,9 +1,10 @@
 """user authentication routes."""
 import redis
+from datetime import timedelta
 from flask import jsonify, request, session
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, get_jwt
 from . import auth
-from .utils import get_user_by_email, model_to_json, jwt_redis_blocklist
+from .utils import get_user_by_email, model_to_json, jwt_redis_blocklist, send_email
 from api.models import User
 from api.app import db, EXPIRY
 
@@ -76,3 +77,34 @@ def logout():
     jti = get_jwt()['jti']
     jwt_redis_blocklist.set(jti, "", ex=EXPIRY)
     return jsonify({'message': 'User logged out successfully'}), 200
+
+@auth.route('/forgot-password', methods=['POST'], strict_slashes=False)
+def forgot_password():
+    """verify and send user forgot password email."""
+    data = request.get_json()
+    email = data.get('email')
+    if not email:
+        return jsonify({'message': 'Missing email field'}), 400
+    user = get_user_by_email(email)
+    if user is not None:
+        user = model_to_json(user)
+        access_token = create_access_token(identity=user['id'], expires_delta=timedelta(minutes=5))
+        msg = f"Click the link below to reset your password\nhttp://localhost:5000/reset-password?token={access_token}"
+        send_email('Password Reset', 'realcharlieok@gmail.com', user['email'], msg )
+        return jsonify({'message': 'Password reset link sent to email'}), 200
+
+
+@auth.route('/reset-password', methods=['POST'], strict_slashes=False)
+@jwt_required()
+def password_reset():
+    """reset user password."""
+    data = request.get_json()
+    password = data.get('password')
+    if not password:
+        return jsonify({'message': 'Missing password field'}), 400
+    user_id = get_jwt_identity()
+    user = User.query.get(user_id)
+    user.set_password(password)
+    db.session.commit()
+    return jsonify({'message': 'Password reset successfully'}), 200
+    
