@@ -6,3 +6,5 @@ mysqlclient
 bcrypt
 Flask-Caching
 Flask-Login
+flask-mail
+flask_jwt_extended

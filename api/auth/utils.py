@@ -1,7 +1,8 @@
 """utility function for user authentication"""
 import json
+from flask_mail import Message
 from api.models import User
-from api.app import db, jwt, jwt_redis_blocklist
+from api.app import db, jwt, jwt_redis_blocklist, mail
 
 def get_user_by_email(email):
     """get user by email."""
@@ -28,3 +29,10 @@ def check_if_token_revoked(jwt_header, jwt_payload):
     jti = jwt_payload['jti']
     token_in_redis = jwt_redis_blocklist.get(jti)
     return token_in_redis is not None
+
+
+def send_email(subject, sender, reciepient, body):
+    """Send Email to User."""
+    msg = Message(subject, sender=sender, recipients=[reciepient])
+    msg.body = body
+    mail.send(msg)

@@ -4,6 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from flask_login import LoginManager
 from flask_jwt_extended import JWTManager
+from flask_mail import Mail
 from datetime import timedelta
 from .config import DevConfig
 
@@ -17,6 +18,13 @@ app.config.from_object(DevConfig)
 app.config['JWT_SECRET_KEY'] = 'mdmsecrete'
 app.config['JWT_TOKEN_LOCATION'] = ['headers']
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = EXPIRY
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_USERNAME'] = 'realcharlieok@gmail.com'
+app.config['MAIL_PASSWORD'] = 'ifkzempywmtjokwm'
+app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_USE_SSL'] = True
+mail = Mail(app)
 
 db.init_app(app)
 
