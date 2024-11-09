@@ -1,10 +1,11 @@
 """user authentication routes."""
+import redis
 from flask import jsonify, request, session
-from flask_login import login_user, logout_user
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, get_jwt
 from . import auth
-from .utils import get_user_by_email, model_to_json
+from .utils import get_user_by_email, model_to_json, jwt_redis_blocklist
 from api.models import User
-from api.app import db
+from api.app import db, EXPIRY
 
 
 @auth.route('/register', methods=['POST'], strict_slashes=False)
@@ -51,14 +52,27 @@ def login():
     if not user.validate_password(password):
         return jsonify({'message': 'Incorrect password'}), 400
     
-    login_user(user)
     user = model_to_json(user)
-    print(user['id'])
-    return jsonify({'id': user['id'], 'name': user['name'], 'email': user['email'], 'message': 'User logged in successfully'}), 200
+    access_token = create_access_token(identity=user['id'])
+    return jsonify({'message': 'User logged in successfully', 'access_token': access_token}), 200
+
+@auth.route('/user', methods=['GET'], strict_slashes=False)
+@jwt_required()
+def get_user():
+    """retrieve user details."""
+    user_id = get_jwt_identity()
+    user = User.query.get(user_id)
+    if user is None:
+        return jsonify({'message': 'Invalid jwt token or user does not exist'}), 400
+    user = model_to_json(user)
+    user_data = {'name': user['name'], 'email': user['email']}
+    return jsonify({'user': user_data}), 200
 
 
 @auth.route('/logout/', methods=['POST'], strict_slashes=False)
+@jwt_required()
 def logout():
     """logout a user"""
-    logout_user()
+    jti = get_jwt()['jti']
+    jwt_redis_blocklist.set(jti, "", ex=EXPIRY)
     return jsonify({'message': 'User logged out successfully'}), 200

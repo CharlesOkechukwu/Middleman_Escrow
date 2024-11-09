@@ -1,16 +1,29 @@
+import redis
 from flask import Flask, jsonify, Blueprint
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from flask_login import LoginManager
+from flask_jwt_extended import JWTManager
+from datetime import timedelta
 from .config import DevConfig
 
 
+EXPIRY = timedelta(hours=24)
 """initialize the database"""
 db = SQLAlchemy()
 
 app = Flask(__name__)
 app.config.from_object(DevConfig)
+app.config['JWT_SECRET_KEY'] = 'mdmsecrete'
+app.config['JWT_TOKEN_LOCATION'] = ['headers']
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = EXPIRY
+
 db.init_app(app)
+
+jwt = JWTManager(app)
+
+"""setup redis server to store jwt_blocklist tokens"""
+jwt_redis_blocklist = redis.StrictRedis(host='localhost', port=6379, db=0, decode_responses=True)
 
 """register auth and views blueprints"""
 from .auth import auth
