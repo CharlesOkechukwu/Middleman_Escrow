@@ -66,6 +66,7 @@ def get_user():
     if user is None:
         return jsonify({'message': 'Invalid jwt token or user does not exist'}), 400
     user = model_to_json(user)
+    print(user)
     user_data = {'name': user['name'], 'email': user['email']}
     return jsonify({'user': user_data}), 200
 
