@@ -38,7 +38,7 @@ const HeaderBox: React.FC = () => {
           Buy Now
         </Button>
         <Button variant='outline' className='rounded-[7px] w-[161px] text-pry'>
-          <NavLink to='#'>
+          <NavLink to='/auth/login'>
             Sign Up
           </NavLink>
         </Button>

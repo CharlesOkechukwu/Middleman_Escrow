@@ -14,13 +14,15 @@ export default {
 					// foreground: 'hsl(var(--primary-foreground))'
 				},
 				'pry-black': '#333333',
-				'gray': '#F4F4F4'
+				'gray': '#F4F4F4',
+				'grey1': '#D9D9D9',
 			},
 			spacing: {
 				'1197': '1197px'
 			},
 			fontSize: {
-				14: '14px'
+				14: '14px',
+				18: '18px',
 			}
 		}
 	},
