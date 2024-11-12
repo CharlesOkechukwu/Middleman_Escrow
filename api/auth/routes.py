@@ -66,9 +66,23 @@ def get_user():
     if user is None:
         return jsonify({'message': 'Invalid jwt token or user does not exist'}), 400
     user = model_to_json(user)
-    print(user)
     user_data = {'name': user['name'], 'email': user['email']}
     return jsonify({'user': user_data}), 200
+
+@auth.route('/user/update', methods=['PUT'], strict_slashes=False)
+@jwt_required()
+def update_user():
+    """update user name."""
+    data = request.get_json()
+    name = data.get('name')
+    if not name:
+        return jsonify({'message': 'Missing name field'}), 400
+    user_id = get_jwt_identity()
+    user = User.query.get(user_id)
+    user.name = name
+    db.session.commit()
+    return jsonify({'message': 'User updated successfully'}), 200
+
 
 
 @auth.route('/logout/', methods=['POST'], strict_slashes=False)
