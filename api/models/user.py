@@ -11,6 +11,8 @@ class User(UserMixin, db.Model):
     name = db.Column(db.String(300), nullable=False)
     email = db.Column(db.String(300), unique=True, nullable=False)
     password = db.Column(db.String(300), nullable=False)
+    products = db.relationship('Product', backref='user')
+    details = db.relationship('UserDetails', backref='user_details')
 
     def set_password(self, password):
         """set and hash user's password."""
