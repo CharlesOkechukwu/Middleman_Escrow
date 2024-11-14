@@ -11,7 +11,7 @@ interface Props {
 
 const AuthBanner: React.FC<Props> = ({ variant }) => {
   return (
-    <aside className='w-[619px] hidden lg:block relative'>
+    <aside className='w-[619px] h-full hidden lg:block relative'>
       {
         variant === 'right' ?
           (

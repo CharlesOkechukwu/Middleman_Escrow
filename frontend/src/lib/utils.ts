@@ -7,9 +7,9 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export const authFormSchema = z.object({
-  fullName: z.string().min(4).optional(),
+export const authFormSchema = (type: string) => z.object({
+  fullName: type === 'sign-up' ? z.string().optional() : z.string().min(3),
   email: z.string().email(),
   password: z.string().min(8),
-  confirmPassword: z.string().min(8).optional()
+  confirmPassword: type === 'sign-up' ? z.string().optional() : z.string().min(8),
 })
