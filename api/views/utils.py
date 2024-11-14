@@ -1,5 +1,7 @@
 """Module for all utility function for view routes"""
 import os
+import json
+from datetime import datetime
 from werkzeug.utils import secure_filename
 from flask import current_app
 
@@ -20,3 +22,19 @@ def upload_image(file):
         return file_path
     return None
 
+
+def model_with_date_to_json(obj):
+    """serialize SQLALchemy Object with datetime to json"""
+    data = {}
+    fields = [field for field in dir(obj) if not field.startswith('_') and field != 'metadate' and field != 'password']
+    for field in fields:
+        value = obj.__getattribute__(field)
+        if isinstance(value, datetime):
+            data[field] = value.strftime('%Y-%m-%d %H:%M:%S')
+        else:
+            try:
+                json.dumps(value)
+                data[field] = value
+            except TypeError:
+                data[field] = None
+    return data

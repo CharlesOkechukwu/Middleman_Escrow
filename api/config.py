@@ -10,3 +10,9 @@ class DevConfig:
     host = 'localhost'
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = "mysql+mysqldb://{}:{}@{}/{}".format(username, password, host, DB_NAME)
+
+class TestConfig:
+    """SQLite test database config"""
+    DEBUG = True
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///{}_test.db'.format(DB_NAME)
+    SQLALCHEMY_TRACK_MODIFICATIONS = False

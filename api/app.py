@@ -6,7 +6,7 @@ from flask_login import LoginManager
 from flask_jwt_extended import JWTManager
 from flask_mail import Mail
 from datetime import timedelta
-from .config import DevConfig
+from .config import DevConfig, TestConfig
 
 
 EXPIRY = timedelta(hours=24)
