@@ -14,7 +14,7 @@ EXPIRY = timedelta(hours=24)
 db = SQLAlchemy()
 
 app = Flask(__name__)
-app.config.from_object(DevConfig)
+app.config.from_object(TestConfig)
 app.config['JWT_SECRET_KEY'] = 'mdmsecrete'
 app.config['JWT_TOKEN_LOCATION'] = ['headers']
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = EXPIRY
