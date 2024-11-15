@@ -4,7 +4,7 @@ from datetime import timedelta
 from flask import jsonify, request, session
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, get_jwt
 from . import auth
-from .utils import get_user_by_email, model_to_json, jwt_redis_blocklist, send_email
+from .utils import get_user_by_email, model_to_json, jwt_redis_blocklist, send_email, validate_email, validate_password
 from api.models import User
 from api.app import db, EXPIRY
 
@@ -17,9 +17,19 @@ def register():
     name = data.get('name')
     email = data.get('email')
     password = data.get('password')
+    confirm_password = data.get('confirm_password')
 
     if not name or not email or not password:
         return jsonify({'message': 'Missing required fields'}), 400
+    
+    if not validate_email(email):
+        return jsonify({'message': 'Invalid email format'}), 400
+    
+    if not validate_password(password):
+        return jsonify({'message': 'Password must be at least 8 characters long and contain a number and special character'}), 400
+    
+    if password != confirm_password:
+        return jsonify({'message': 'Passwords do not match'}), 400
     
     user = get_user_by_email(email)
     if user:
@@ -79,6 +89,8 @@ def update_user():
         return jsonify({'message': 'Missing name field'}), 400
     user_id = get_jwt_identity()
     user = User.query.get(user_id)
+    if user is None:
+        return jsonify({'message': 'Invalid jwt token or user does not exist'}), 400
     user.name = name
     db.session.commit()
     return jsonify({'message': 'User updated successfully'}), 200
@@ -106,7 +118,7 @@ def forgot_password():
         access_token = create_access_token(identity=user['id'], expires_delta=timedelta(minutes=5))
         msg = f"Click the link below to reset your password\nhttp://localhost:5000/reset-password?token={access_token}"
         send_email('Password Reset', 'realcharlieok@gmail.com', user['email'], msg )
-        return jsonify({'message': 'Password reset link sent to email'}), 200
+    return jsonify({'message': 'Password reset link sent to email'}), 200
 
 
 @auth.route('/reset-password', methods=['POST'], strict_slashes=False)
@@ -119,6 +131,8 @@ def password_reset():
         return jsonify({'message': 'Missing password field'}), 400
     user_id = get_jwt_identity()
     user = User.query.get(user_id)
+    if user is None:
+        return jsonify({'message': 'Invalid jwt token or user does not exist'}), 400
     user.set_password(password)
     db.session.commit()
     return jsonify({'message': 'Password reset successfully'}), 200
