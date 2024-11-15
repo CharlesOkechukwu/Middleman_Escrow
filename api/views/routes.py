@@ -21,6 +21,8 @@ def add_product():
 
     user_id = get_jwt_identity()
     user_obj = User.query.get(user_id)
+    if user_obj is None:
+        return jsonify({'message': 'User not found'}), 404
     user = model_to_json(user_obj)
     code = f"{name[:3]}-{user['id']}-{random.randint(100, 9999)}"
     product = Product(code=code, name=name, price=price, details=details, user_id=user['id'])
@@ -38,6 +40,8 @@ def get_products():
     """Retrieve all user's products."""
     user_id = get_jwt_identity()
     user = User.query.get(user_id)
+    if user is None:
+        return jsonify({'message': 'User not found'}), 404
     product_data = [model_to_json(product) for product in user.products]
     products = []
     for product in product_data:
@@ -64,6 +68,8 @@ def add_user_details():
         db.session.commit()
         return jsonify({'message': 'User details added successfully'}), 201
     user_details = UserDetails.query.filter_by(user_id=user_id).all()
+    if user_details == []:
+        return jsonify({'message': 'No user details found'}), 404
     user_details = [model_to_json(details) for details in user_details]
     details = []
     for detail in user_details:
@@ -79,6 +85,8 @@ def add_epc():
     """Create a new Escrow Purchase Contract."""
     user_id = get_jwt_identity()
     user = User.query.get(user_id)
+    if user is None:
+        return jsonify({'message': 'User not found'}), 404
     user = model_to_json(user)
     data = request.get_json()
     escrow_uid = str(uuid.uuid4())
@@ -119,6 +127,8 @@ def get_epcs():
     user_id = get_jwt_identity()
     buyer_epcs = EscrowPurchaseContract.query.filter_by(buyer_id=user_id).all()
     seller_epcs = EscrowPurchaseContract.query.filter_by(seller_id=user_id).all()
+    if buyer_epcs == [] and seller_epcs == []:
+        return jsonify({'message': 'No Escrow Purchase Contracts found'}), 404
     buyer_epcs = [model_with_date_to_json(epc) for epc in buyer_epcs]
     seller_epcs = [model_with_date_to_json(epc) for epc in seller_epcs]
     all_epcs = []
@@ -139,6 +149,8 @@ def get_epcs():
 def view_epc(escrow_uid):
     """View single Escrow Purchase Contract."""
     epc = EscrowPurchaseContract.query.filter_by(escrow_uid=escrow_uid).first()
+    if epc is None:
+        return jsonify({'message': 'Escrow Purchase Contract not found'}), 404
     items = epc.items
     epc = model_with_date_to_json(epc)
     items = [model_to_json(item) for item in items]
@@ -160,6 +172,8 @@ def edit_epc(escrow_uid):
     """Update or delete Escrow Purchase Contract."""
     user_id = get_jwt_identity()
     epc = EscrowPurchaseContract.query.filter_by(escrow_uid=escrow_uid).first()
+    if epc is None:
+        return jsonify({'message': 'Escrow Purchase Contract not found'}), 404
     epc_json = model_to_json(epc)
     if request.method == 'DELETE':
         if user_id != epc.seller_id:
@@ -197,15 +211,20 @@ def edit_epc(escrow_uid):
 def edit_item(item_id):
     """update or delete an item in an Escrow Purchase Contract."""
     item = EPCItem.query.filter_by(id=item_id).first()
+    if item is None:
+        return jsonify({'message': 'Item not found'}), 404
+    epc = EscrowPurchaseContract.query.filter_by(escrow_uid=item.escrow_uid).first()
+    if epc is None:
+        return jsonify({'message': 'Escrow Purchase Contract not found for this item'}), 404
     item_json = model_to_json(item)
     if request.method == 'DELETE':
-        if item.escrow_purchase_contract.status == 'paid':
+        if epc.status == 'paid':
             return jsonify({'message': 'Cannot delete item from a paid Escrow Purchase Contract'}), 400
         db.session.delete(item)
         db.session.commit()
         message = f'Item {item_json["product_name"]} deleted successfully'
         return jsonify({'message': message}), 200
-    if item.escrow_purchase_contract.status == 'paid':
+    if epc.status == 'paid':
         return jsonify({'message': 'Cannot update item in a paid Escrow Purchase Contract'}), 400
     data = request.get_json()
     product_name = data.get('product_name')

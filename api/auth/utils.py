@@ -36,3 +36,21 @@ def send_email(subject, sender, reciepient, body):
     msg = Message(subject, sender=sender, recipients=[reciepient])
     msg.body = body
     mail.send(msg)
+
+
+def validate_email(email):
+    """validate email."""
+    return '@' in email and '.' in email
+
+
+def validate_password(password):
+    """check if password is valid."""
+    if len(password) < 8:
+        return False
+    numbers = [str(i) for i in range(10)]
+    if not any(char in numbers for char in password):
+        return False
+    special_chars = ['!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '_', '+', '=']
+    if not any(char in special_chars for char in password):
+        return False
+    return True
