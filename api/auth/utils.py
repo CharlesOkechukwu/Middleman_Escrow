@@ -1,5 +1,6 @@
 """utility function for user authentication"""
 import json
+from threading import Thread
 from flask_mail import Message
 from api.models import User
 from api.app import db, jwt, jwt_redis_blocklist, mail
