@@ -1,9 +1,11 @@
 import { createContext, ReactNode, useContext, useState } from "react";
-// import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import authServices from "@/services/auth";
 
 
 type AuthContextType = {
   isAuthenticated: boolean;
+  setIsAuthenticated: (param: boolean) => void;
 }
 
 type AuthProviderProps = {
@@ -16,11 +18,13 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true)
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    return !!localStorage.getItem('token')
+  });
   // const navigate = useNavigate()
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated }}>
+    <AuthContext.Provider value={{ isAuthenticated, setIsAuthenticated }}>
       {children}
     </AuthContext.Provider>
   )

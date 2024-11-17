@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import logo from '@/assets/images/logo.svg';
 import { Eye, EyeOff } from 'lucide-react';
 import AuthForm from '@/components/auth/AuthForm';
@@ -12,21 +12,27 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import useLogin from '@/hooks/useLogin';
+
+
+
 interface Props {
 
 }
 
 const formSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(8),
+  password: z.string().min(7),
 })
 
 const LoginPage: React.FC<Props> = (props) => {
 
+  const { login, errorMsg } = useLogin()
   const [showPassword, setShowPassword] = useState(false)
 
   const handleTogglePassword = () => {
-    setShowPassword(!showPassword)
+    setShowPassword(!showPassword);
+
   }
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -37,9 +43,14 @@ const LoginPage: React.FC<Props> = (props) => {
     },
   })
 
+  const navigate = useNavigate();
+
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
-    console.log(data);
+    await login(data)
+    navigate('/dashboard')
+    // console.log(errorMsg);
   };
+
   return (
     <section className='w-full bg-[#F0F2F5] 2xl:w-[1440px] mx-auto block lg:flex justify-between'>
       <aside className='w-full lg:flex-1 px-5 lg:px-16 py-10'>

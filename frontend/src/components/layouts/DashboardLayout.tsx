@@ -18,3 +18,4 @@ const DashboardLayout: React.FC = () => {
 }
 
 export default DashboardLayout;
+// flask --app app run 

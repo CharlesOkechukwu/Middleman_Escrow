@@ -10,15 +10,15 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from '@/component
 import { Input } from '@/components/ui/input';
 import { Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-
+import authServices from '@/services/auth';
 
 
 const formSchema = z.object({
-  fullName: z.string().min(3),
+  name: z.string().min(3),
   email: z.string().email(),
   password: z.string().min(8),
-  confirmPassword: z.string().min(8)
-}).refine(data => data.password === data.confirmPassword)
+  confirm_password: z.string().min(8)
+}).refine(data => data.password === data.confirm_password)
 
 const SignUp: React.FC = () => {
 
@@ -35,14 +35,15 @@ const SignUp: React.FC = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      fullName: '',
+      name: '',
       email: "",
       password: '',
-      confirmPassword: ''
+      confirm_password: ''
     },
   })
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
+    await authServices.register(data)
     console.log(data);
   };
 
@@ -61,11 +62,11 @@ const SignUp: React.FC = () => {
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                   <FormField
                     control={form.control}
-                    name="fullName"
+                    name="name"
                     render={({ field }) => (
                       <FormItem>
                         <FormControl>
-                          <Input type='text' placeholder="FullName" {...field} className='w-full flex items-center h-[50px] rounded-[10px] bg-white border border-grey1 px-3' />
+                          <Input type='text' placeholder="name" {...field} className='w-full flex items-center h-[50px] rounded-[10px] bg-white border border-grey1 px-3' />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -113,7 +114,7 @@ const SignUp: React.FC = () => {
                   />
                   <FormField
                     control={form.control}
-                    name="confirmPassword"
+                    name="confirm_password"
                     render={({ field }) => (
                       <FormItem>
                         <FormControl>
@@ -143,7 +144,7 @@ const SignUp: React.FC = () => {
                     Create Account
                   </Button>
 
-                  <p className='text-[14px] pt-5 text-center text-[#5A5A5A]'>
+                  <p className='text-[14px] pt-3 text-center text-[#5A5A5A]'>
                     By continuing you indicate that you read and agreed to the Terms of Use
                   </p>
                 </form>

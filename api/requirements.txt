@@ -2,7 +2,6 @@ flask
 flask-cors
 pycodestyle
 SQLAlchemy
-mysqlclient
 bcrypt
 Flask-Caching
 Flask-Login

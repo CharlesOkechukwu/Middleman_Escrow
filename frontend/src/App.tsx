@@ -1,4 +1,5 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 import { DefaultLayout } from './components/layouts/DefaultLayout';
 import HomePage from './pages/home';
 import AuthLayout from './components/layouts/AuthLayout';
@@ -71,9 +72,12 @@ const router = createBrowserRouter([
 
 function App() {
   return (
-    <AuthProvider>
-      <RouterProvider router={router} />
-    </AuthProvider>
+    <>
+      <AuthProvider>
+        <RouterProvider router={router} />
+      </AuthProvider>
+      <Toaster />
+    </>
   )
 }
 
