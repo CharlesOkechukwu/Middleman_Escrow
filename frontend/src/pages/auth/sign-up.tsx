@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import authServices from '@/services/auth';
+import useSignup from '@/hooks/useSignup';
 
 
 const formSchema = z.object({
@@ -42,9 +43,11 @@ const SignUp: React.FC = () => {
     },
   })
 
+  const navigate = useNavigate()
+  const { register } = useSignup()
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
-    await authServices.register(data)
-    console.log(data);
+    await register(data)
+    navigate('/auth/login')
   };
 
   return (

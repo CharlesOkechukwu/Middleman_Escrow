@@ -1,4 +1,6 @@
+import toast from "react-hot-toast";
 import authServices from '@/services/auth';
+
 
 const useSignup = () => {
 
@@ -6,6 +8,8 @@ const useSignup = () => {
     try {
       await authServices.register(param)
         .then(res => {
+          localStorage.setItem('token', JSON.stringify(res?.data?.access_token))
+          toast.success(res.data.message)
           console.log(res)
         })
     } catch (error: any) {

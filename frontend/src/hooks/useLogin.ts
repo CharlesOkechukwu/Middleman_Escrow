@@ -17,12 +17,12 @@ const useLogin = () => {
       setErrorMsg(null)
       await authServices.login(params)
         .then(res => {
-          // if (res.status === 200) {
-          localStorage.setItem('token', JSON.stringify(res?.data?.access_token))
-          setIsAuthenticated(true)
-          toast.success(res.data.message)
-          console.log(res)
-          // }
+          if (res.status === 200) {
+            localStorage.setItem('token', JSON.stringify(res?.data?.access_token))
+            setIsAuthenticated(true)
+            toast.success(res.data.message)
+            console.log(res)
+          }
 
         })
     } catch (error: any) {
