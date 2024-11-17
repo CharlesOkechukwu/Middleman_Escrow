@@ -23,8 +23,12 @@ def add_product():
     user = model_to_json(user_obj)
     code = f"{name[:3]}-{user['id']}-{random.randint(100, 9999)}"
     product = Product(code=code, name=name, price=price, details=details, user_id=user['id'])
-    db.session.add(product)
-    db.session.commit()
+    try:
+        db.session.add(product)
+        db.session.commit()
+    except Exception as e:
+        print(e)
+        return jsonify({"status": "error", 'message': 'An error occurred while adding product'}), 500
     product = model_to_json(product)
     product_data = {'id': product['id'], 'code': product['code'], 'name': product['name'],
                     'price': product['price'], 'details': product['details'], 'owner': product['user_id']}
@@ -61,9 +65,13 @@ def add_user_details():
         bank_account_name = data.get('bank_account_name')
         user_details = UserDetails(user_id=user_id, business_name=business_name, bank_name=bank_name,
                                   bank_account_number=bank_account_number, bank_account_name=bank_account_name)
-        db.session.add(user_details)
-        db.session.commit()
-        return jsonify({'message': 'User details added successfully'}), 201
+        try:
+            db.session.add(user_details)
+            db.session.commit()
+            return jsonify({'message': 'User details added successfully'}), 201
+        except Exception as e:
+            print(e)
+            return jsonify({"status": "error", 'message': 'An error occurred while adding user details'}), 500
     user_details = UserDetails.query.filter_by(user_id=user_id).all()
     if user_details == []:
         return jsonify({'message': 'No user details found'}), 404

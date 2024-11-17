@@ -34,8 +34,12 @@ def add_epc():
     epc = EscrowPurchaseContract(escrow_uid=escrow_uid, buyer_id=buyer_id, buyer_name=buyer_name,
                                  seller_id=seller_id, seller_name=seller_name, delivery_fee=delivery_fee,
                                  delivery_date=delivery_date, total_amount=total_amount, status=status)
-    db.session.add(epc)
-    db.session.commit()
+    try:
+        db.session.add(epc)
+        db.session.commit()
+    except Exception as e:
+        print(e)
+        return jsonify({'status': 'error', 'message': 'An error occurred while creating Escrow Purchase Contract'}), 500
     items = data.get('items')
     for item in items:
         escrow_uid = epc.escrow_uid
@@ -47,8 +51,12 @@ def add_epc():
         description = item.get('description')
         epc_item = EPCItem(escrow_uid=escrow_uid, product_name=product_name, product_code=product_code, quantity=quantity,
                            price=price, total=total, description=description)
-        db.session.add(epc_item)
-        db.session.commit()
+        try:
+            db.session.add(epc_item)
+            db.session.commit()
+        except Exception as e:
+            print(e)
+            return jsonify({"status": "error", 'message': 'An error occurred while adding item to Escrow Purchase Contract'}), 500
     return jsonify({'message': 'Escrow Purchase Contract created successfully', 'escrow_unique_id': escrow_uid}), 201
 
 
@@ -112,8 +120,12 @@ def edit_epc(escrow_uid):
             return jsonify({'message': 'You are not authorized to delete this Escrow Purchase Contract'}), 403
         if epc.status == 'paid':
             return jsonify({'message': 'Cannot delete a paid Escrow Purchase Contract'}), 400   
-        db.session.delete(epc)
-        db.session.commit()
+        try:
+            db.session.delete(epc)
+            db.session.commit()
+        except Exception as e:
+            print(e)
+            return jsonify({'status': 'error', 'message': 'An error occurred while deleting Escrow Purchase Contract'}), 500
         message = f'Escrow Purchase Contract {epc_json["escrow_uid"]} deleted successfully'
         return jsonify({'message': message}), 200
     data = request.get_json()
@@ -123,8 +135,12 @@ def edit_epc(escrow_uid):
         epc.delivery_fee = delivery_fee
         epc.delivery_date = data.get('delivery_date')
         epc.total_amount = new_total_amount
-        db.session.commit()
-        return jsonify({'message': 'Escrow Purchase Contract updated successfully'}), 200
+        try:
+            db.session.commit()
+            return jsonify({'message': 'Escrow Purchase Contract updated successfully'}), 200
+        except Exception as e:
+            print(e)
+            return jsonify({'status': 'error', 'message': 'An error occurred while updating Escrow Purchase Contract'}), 500
     
     status = data.get('status')
     if status != 'accepted':
@@ -134,8 +150,12 @@ def edit_epc(escrow_uid):
     epc.status = status
     epc.buyer_id = user_id
     epc.buyer_name = user['name']
-    db.session.commit()
-    return jsonify({"Message": f"Escrow Contract {epc_json['escrow_uid']} accepted"})
+    try:
+        db.session.commit()
+        return jsonify({"Message": f"Escrow Contract {epc_json['escrow_uid']} accepted"})
+    except Exception as e:
+        print(e)
+        return jsonify({"status": "error", "message": "An error occurred while updating Escrow Purchase Contract"}), 500
 
 
 @views.route('/edit/item/<item_id>', methods=['PUT', 'DELETE'], strict_slashes=False)
@@ -152,8 +172,13 @@ def edit_item(item_id):
     if request.method == 'DELETE':
         if epc.status == 'paid':
             return jsonify({'message': 'Cannot delete item from a paid Escrow Purchase Contract'}), 400
-        db.session.delete(item)
-        db.session.commit()
+        try:
+            db.session.delete(item)
+            db.session.commit()
+        except Exception as e:
+            print(e)
+            return jsonify({'status': 'error', 'message': 'An error occurred while deleting item'}), 500
+        
         message = f'Item {item_json["product_name"]} deleted successfully'
         return jsonify({'message': message}), 200
     if epc.status == 'paid':
@@ -174,6 +199,10 @@ def edit_item(item_id):
         item.total = total
     if description is not None:
         item.description = description
-    db.session.commit()
-    msg = f'Item {item_json["product_name"]} updated successfully'
-    return jsonify({'message': msg}), 200
+    try:
+        db.session.commit()
+        msg = f'Item {item_json["product_name"]} updated successfully'
+        return jsonify({'message': msg}), 200
+    except Exception as e:
+        print(e)
+        return jsonify({'status': 'error', 'message': 'An error occurred while updating item'}), 500

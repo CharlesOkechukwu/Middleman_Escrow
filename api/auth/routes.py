@@ -37,8 +37,12 @@ def register():
     
     new_user = User(name=name, email=email)
     new_user.set_password(password)
-    db.session.add(new_user)
-    db.session.commit()
+    try:
+        db.session.add(new_user)
+        db.session.commit()
+    except Exception as e:
+        print(e)
+        return jsonify({"status": "error", 'message': 'An error occurred while creating user'}), 500
 
     new_user = model_to_json(new_user)
     access_token = create_access_token(identity=new_user['id'])
@@ -93,8 +97,12 @@ def update_user():
     if user is None:
         return jsonify({'message': 'Invalid jwt token or user does not exist'}), 400
     user.name = name
-    db.session.commit()
-    return jsonify({"status": "success", 'message': 'User updated successfully'}), 200
+    try:
+        db.session.commit()
+        return jsonify({"status": "success", 'message': 'User updated successfully'}), 200
+    except Exception as e:
+        print(e)
+        return jsonify({"status": "error", 'message': 'An error occurred while updating user'}), 500
 
 
 
@@ -103,8 +111,11 @@ def update_user():
 def logout():
     """logout a user"""
     jti = get_jwt()['jti']
-    jwt_redis_blocklist.set(jti, "", ex=EXPIRY)
-    return jsonify({"status": "success", 'message': 'User logged out successfully'}), 200
+    try:
+        jwt_redis_blocklist.set(jti, "", ex=EXPIRY)
+        return jsonify({"status": "success", 'message': 'User logged out successfully'}), 200
+    except redis.exceptions.ConnectionError:
+        return jsonify({"status": "error", 'message': 'An error occurred while logging out'}), 500
 
 @auth.route('/forgot-password', methods=['POST'], strict_slashes=False)
 def forgot_password():
@@ -118,8 +129,12 @@ def forgot_password():
         user = model_to_json(user)
         access_token = create_access_token(identity=user['id'], expires_delta=timedelta(minutes=5))
         msg = f"Click the link below to reset your password\nhttp://localhost:5000/reset-password?token={access_token}"
-        send_email('Password Reset', 'realcharlieok@gmail.com', user['email'], msg )
-    return jsonify({"status": "success", 'message': 'Password reset link sent to email'}), 200
+        try:
+            send_email('Password Reset', 'realcharlieok@gmail.com', user['email'], msg )
+            return jsonify({"status": "success", 'message': 'Password reset link sent to email'}), 200
+        except Exception as e:
+            print(e)
+            return jsonify({"status": "error", 'message': 'An error occurred while sending email'}), 500
 
 
 @auth.route('/reset-password', methods=['POST'], strict_slashes=False)
@@ -139,7 +154,12 @@ def password_reset():
     user = User.query.get(user_id)
     if user is None:
         return jsonify({'message': 'Invalid jwt token or user does not exist'}), 400
-    user.set_password(password)
-    db.session.commit()
-    return jsonify({"status": "success", 'message': 'Password reset successfully'}), 200
+    try:
+        user.set_password(password)
+        db.session.commit()
+        return jsonify({"status": "success", 'message': 'Password reset successfully'}), 200
+    except Exception as e:
+        print(e)
+        return jsonify({"status": "error", 'message': 'An error occurred while resetting password'}), 500
+
     
