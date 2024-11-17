@@ -28,8 +28,12 @@ def create_order():
     seller_id = data.get("seller_id")
     escrow_order = EscrowPurchaseOrder(seller_name=seller_name, buyer_name=buyer_name, buyer_id=buyer_id,
                                        seller_id=seller_id, delivery_fee=delivery_fee, total_amount=total_amount, status=status)
-    db.session.add(escrow_order)
-    db.session.commit()
+    try:
+        db.session.add(escrow_order)
+        db.session.commit()
+    except Exception as e:
+        print(e)
+        return jsonify({"status": "error", "message": "An error occurred while creating Escrow Purchase Order"}), 500
     escrow_order = model_to_json(escrow_order)
     for item in items:
         order_id = escrow_order['order_id']
@@ -39,8 +43,12 @@ def create_order():
         total = item.get("total")
         order_item = EscrowOrderItem(order_id=order_id, item_name=item_name, price=price, quantity=quantity,
                                      total=total)
-        db.session.add(order_item)
-        db.session.commit()
+        try:
+            db.session.add(order_item)
+            db.session.commit()
+        except Exception as e:
+            print(e)
+            return jsonify({"status": "error", "message": "An error occurred while adding item to Escrow Purchase Order"}), 500
     return jsonify({"status": 'success', "order_id": escrow_order["order_id"], "message": "Escrow Purchase Order Created Successfully, click share to send link to seller"})
 
 @views.route('/orders', strict_slashes=False)
@@ -103,11 +111,15 @@ def update_order(order_id):
         if user_id != order.buyer_id:
             return jsonify({"status": "error", "message": "You are not authorized to delete this order"}), 403
         order_items = order.items
-        for item in order_items:
-            db.session.delete(item)
-        db.session.delete(order)
-        db.session.commit()
-        return jsonify({"status": "success", "message": "Order deleted successfully"}), 200
+        try:
+            for item in order_items:
+                db.session.delete(item)
+            db.session.delete(order)
+            db.session.commit()
+            return jsonify({"status": "success", "message": "Order deleted successfully"}), 200
+        except Exception as e:
+            print(e)
+            return jsonify({"status": "error", "message": "An error occurred while deleting order"}), 500
     
     data = request.get_json()
     if user_id == order.buyer_id and order.status == 'pending':
@@ -115,8 +127,12 @@ def update_order(order_id):
         new_total_amount = (order.total_amount - order.delivery_fee) + delivery_fee
         order.delivery_fee = delivery_fee
         order.total_amount = new_total_amount
-        db.session.commit()
-        return jsonify({"status": "success", "message": "Order updated successfully"}), 200
+        try:
+            db.session.commit()
+            return jsonify({"status": "success", "message": "Order updated successfully"}), 200
+        except Exception as e:
+            print(e)
+            return jsonify({"status": "error", "message": "An error occurred while updating order"}), 500
     status = data.get('status')
     if status == 'accepted':
         order.status = status
@@ -128,6 +144,10 @@ def update_order(order_id):
         order.seller_name = user['name']
         if user_details is not None and user_details['business_name'] is not None:
             order.seller_name = user_details['business_name']
-        db.session.commit()
-        order = model_to_json(order)
-        return jsonify({"status": "success", "order_id": order['order_id'], "message": "Order accepted successfully, Please create escrow purchase contract"}), 200
+        try:
+            db.session.commit()
+            order = model_to_json(order)
+            return jsonify({"status": "success", "order_id": order['order_id'], "message": "Order accepted successfully, Please create escrow purchase contract"}), 200
+        except Exception as e:
+            print(e)
+            return jsonify({"status": "error", "message": "An error occurred while accepting order"}), 500
