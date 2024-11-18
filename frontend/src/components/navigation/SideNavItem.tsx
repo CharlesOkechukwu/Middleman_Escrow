@@ -19,8 +19,7 @@ interface Props {
 }
 
 const SideNavItem: React.FC<Props> = (props) => {
-  const { name, path, dropdown, icon, id } = props;
-  console.log(id)
+  const { name, path, dropdown, icon } = props;
   return (
     <>
       <div className='flex gap-x-2.5 items-center'>

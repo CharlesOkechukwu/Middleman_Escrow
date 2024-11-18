@@ -32,12 +32,17 @@ const NavIcon: React.FC<Props> = ({ icon }) => {
                     <use xlinkHref="/sprite.svg#dispute" />
                   </svg>
                 )
-                :
-                (
-                  <svg width="18" height="18" viewBox="0 0 18 18">
-                    <use xlinkHref="/sprite.svg#notification" />
-                  </svg>
-                )
+                : icon === 'logout' ?
+                  (
+                    <svg width="18" height="18" viewBox="0 0 18 18">
+                      <use xlinkHref="/sprite.svg#logout" />
+                    </svg>
+                  )
+                  : (
+                    <svg width="18" height="18" viewBox="0 0 18 18">
+                      <use xlinkHref="/sprite.svg#notification" />
+                    </svg>
+                  )
       }
     </span>
   );

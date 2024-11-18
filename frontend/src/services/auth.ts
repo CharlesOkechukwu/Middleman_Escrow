@@ -1,28 +1,28 @@
-// import http from "@/config/axios";
-import axios from "axios";
-
-
-const API_URL = 'http://127.0.0.1:5000'
-
+import http from "@/config/axios";
+// import axios from "axios";
 
 export const authUrls = {
   LOGIN_URL: '/login',
-  REGISTER_URL: '/register'
+  REGISTER_URL: '/register',
+  LOGOUT: '/logout',
 }
 
 const login = async (params: LoginData) => {
-  return await axios.post(`${API_URL}/login`, params)
+  return await http.post(authUrls.LOGIN_URL, params)
 }
 
 const register = async (params: RegisterData) => {
-  return await axios.post(`${API_URL}/register`, params)
+  return await http.post(authUrls.REGISTER_URL, params)
 }
 
-
+const logout = async () => {
+  return await http.post(authUrls.LOGOUT)
+}
 
 const authServices = {
   login,
-  register
+  register,
+  logout
 }
 
 export default authServices;
