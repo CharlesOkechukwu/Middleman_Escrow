@@ -27,7 +27,7 @@ const formSchema = z.object({
 
 const LoginPage: React.FC<Props> = (props) => {
 
-  const { login, errorMsg } = useLogin()
+  const { login } = useLogin()
   const [showPassword, setShowPassword] = useState(false)
 
   const handleTogglePassword = () => {

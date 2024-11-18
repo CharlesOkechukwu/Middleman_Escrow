@@ -10,7 +10,6 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from '@/component
 import { Input } from '@/components/ui/input';
 import { Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import authServices from '@/services/auth';
 import useSignup from '@/hooks/useSignup';
 
 
