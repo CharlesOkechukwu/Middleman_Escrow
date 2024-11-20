@@ -31,9 +31,9 @@ const AuthForm: React.FC<Props> = ({ type, heading, subHeading }) => {
       </div>
 
       <div className='w-full flex items-center justify-between my-10'>
-        <i className='block w-20 md:w-[120px] lg:w-[165px] h-px bg-grey1' />
+        <i className='block w-20 md:w-[180px] lg:w-[165px] h-px bg-grey1' />
         <p className='font-normal text-[13px]'>Or continue with</p>
-        <i className='block w-20 md:w-[120px] lg:w-[165px] h-px bg-grey1' />
+        <i className='block w-20 md:w-[180px] lg:w-[165px] h-px bg-grey1' />
       </div>
     </div>
   );

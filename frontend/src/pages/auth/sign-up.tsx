@@ -2,18 +2,27 @@ import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import toast from 'react-hot-toast';
+import { Loader } from 'lucide-react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import AuthBanner from '@/components/auth/AuthBanner';
 import AuthForm from '@/components/auth/AuthForm';
 import { CustomInput } from '@/components/auth/CustomInput';
 import { Button } from '@/components/ui/button';
+import authServices from '@/services/auth';
 
 
 const schema = z.object({
-  name: z.string().min(3),
+  name: z.string().min(3, {
+    message: 'Full name must contain at least 3 character(s)'
+  }),
   email: z.string().email(),
-  password: z.string().min(8),
-  confirm_password: z.string().min(8)
+  password: z.string().min(8, {
+    message: 'Password must contain at least 8 character(s)'
+  }),
+  confirm_password: z.string().min(8, {
+    message: 'Password must contain at least 8 character(s)'
+  })
 }).refine(data => data.password === data.confirm_password, {
   message: 'Passwords do not match',
   path: ['confirm_password'],
@@ -38,18 +47,21 @@ const SignUp: React.FC = () => {
   const navigate = useNavigate()
 
   const onSubmit: SubmitHandler<FormField> = async (data) => {
-    console.log(data)
-    setError('root', {
-      message: 'error message from backend'
-    })
+    try {
+      await authServices.register(data)
+        .then(res => {
+          console.log(res)
+        })
+      navigate('/auth/login')
+      // throw new Error()
+    } catch (error: any) {
+      toast.error(error?.response.data?.message)
+      setError('password', {
+        message: error?.response.data?.message
+      })
+      console.log(error.response.data?.message)
+    }
   }
-
-  // const navigate = useNavigate()
-  // const { register } = useSignup()
-  // const onSubmit = async (data: z.infer<typeof formSchema>) => {
-  //   await register(data)
-  //   navigate('/auth/login')
-  // };
 
   return (
     <section className='w-full bg-[#F0F2F5] 2xl:w-[1440px] mx-auto block lg:flex justify-between h-full'>
@@ -59,7 +71,7 @@ const SignUp: React.FC = () => {
           <p>have an account? <NavLink to='/auth/login' className='text-pry'>Sign in!</NavLink></p>
         </div>
         <div className='w-full h-full flex justify-center items-center pt-[55px]'>
-          <section className='h-full lg:h-[559px] w-full lg:w-[500px]'>
+          <section className='h-full lg:h-[559px] w-full md:w-[500px]'>
             <AuthForm type='sign-up' heading='Get Started With middleman' subHeading='Getting started is easy' />
             <div className='w-full'>
               <form onSubmit={handleSubmit(onSubmit)}>
@@ -89,14 +101,15 @@ const SignUp: React.FC = () => {
                 </div>
                 <div className='mb-[28px]'>
                   <CustomInput
-                    placeholder='Password'
+                    placeholder='Confirm Password'
                     type='password'
                     {...register('confirm_password')}
                     errorMsg={errors.confirm_password?.message}
                   />
                 </div>
                 <Button type='submit' className={`rounded-[10px] h-[55px] w-full  bg-pry text-[#f4f4f4]`}>
-                  Create Account
+                  {isSubmitting ? <Loader className='animate-spin' /> : 'Create Account'}
+
                 </Button>
                 <p className='text-[14px] pt-5 text-center text-[#5A5A5A]'>
                   By continuing you indicate that you read and agreed to the Terms of Use
