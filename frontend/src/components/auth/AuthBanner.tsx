@@ -11,11 +11,11 @@ interface Props {
 
 const AuthBanner: React.FC<Props> = ({ variant }) => {
   return (
-    <aside className='w-[619px] h-full hidden lg:block relative'>
+    <aside className='w-[619px] h-full hidden lg:block'>
       {
         variant === 'right' ?
           (
-            <>
+            <div className='relative w-full'>
               <img src={image1} alt="" className='block object-contain' />
               <div className='w-[547px] absolute left-1/2 -translate-x-1/2 h-[270px] rounded-[10px] bg-[#FFF2F221] bottom-[49px] py-[42px] px-[37px]'>
                 <div className=''>
@@ -28,11 +28,11 @@ const AuthBanner: React.FC<Props> = ({ variant }) => {
                   </p>
                 </div>
               </div>
-            </>
+            </div>
           )
           : (
-            <div className='relative'>
-              <img src={image2} alt="" className='block object-contain' />
+            <div className='relative h-full'>
+              <img src={image2} alt="" className='block object-cover h-full' />
               <NavLink to='/'>
                 <img src={logo} alt="company logo" className='absolute top-[70px] left-[50px]' />
               </NavLink>

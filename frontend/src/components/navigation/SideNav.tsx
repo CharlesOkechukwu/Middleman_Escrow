@@ -77,7 +77,7 @@ const SideNav: React.FC<Props> = (props) => {
 
   const handleLogout = async () => {
     localStorage.removeItem('token')
-    // await authServices.logout()
+    await authServices.logout()
     navigate('/auth/login')
   }
   return (

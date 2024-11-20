@@ -1,79 +1,45 @@
-import React, { useState } from 'react';
-import { Control, FieldPath } from 'react-hook-form';
-import { z } from 'zod';
-import { Eye, EyeOff } from 'lucide-react';
-import { FormControl, FormField, FormItem, FormMessage } from '../ui/form';
+import React, { forwardRef, useState } from 'react';
+import { IoEyeOffSharp, IoEyeSharp } from "react-icons/io5";
 import { Input } from '../ui/input';
-import { authFormSchema } from '@/lib/utils';
 
 
-
-const formSchema = authFormSchema('sign-up')
-
-interface Props {
-  name: FieldPath<z.infer<typeof formSchema>>;
-  control: Control<z.infer<typeof formSchema>>;
+interface CustomInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  errorMsg?: string;
   type: string;
-  placeholder: string;
 }
 
-const CustomInput: React.FC<Props> = (props) => {
+export const CustomInput = forwardRef<HTMLInputElement, CustomInputProps>(
+  ({ errorMsg, type, ...props }, ref) => {
 
-  const [showPassword, setShowPassword] = useState(false)
+    const [showPassword, setShowPassword] = useState(false);
 
-  const {
-    name,
-    control,
-    type,
-    placeholder,
-
-  } = props;
-
-  const getType = type === 'password'
-    ? showPassword
-      ? 'text'
+    const getType = type === 'password'
+      ? showPassword
+        ? 'text'
+        : type
       : type
-    : type
 
-  const handleTogglePassword = () => {
-    setShowPassword(!showPassword)
+    const handleTogglePassword = () => {
+      setShowPassword(!showPassword)
+    }
+
+    return (
+      <>
+        <div className='w-full flex items-center h-[63px] rounded-[10px] bg-white border border-grey1 px-5'>
+          <Input
+            type={getType}
+            ref={ref}
+            {...props}
+            className='w-full border-none rounded-[10px] h-full bg-white'
+          />
+          {type === 'password' &&
+            <span onClick={handleTogglePassword} className='block cursor-pointer'>
+              {showPassword ? <IoEyeSharp className='text-xl text-[#B8B8B8]' /> : <IoEyeOffSharp className='text-xl text-[#B8B8B8]' />}
+            </span>
+          }
+        </div>
+        {errorMsg && <div className="text-red-500 text-xs mt-2">{errorMsg}</div>}
+      </>
+    )
   }
-
-  return (
-    <FormField
-      control={control}
-      name={name}
-      render={({ field }) => (
-        <FormItem>
-          <FormControl>
-            <div className='w-full flex items-center h-[50px] rounded-[10px] bg-white border border-grey1 px-3'>
-              <Input
-                type={getType}
-                placeholder={placeholder}
-                {...field}
-                className='w-full border-none rounded-[10px] h-full bg-white'
-              />
-              {
-                type === 'password'
-                && (
-                  <button type='button' onClick={handleTogglePassword}>
-                    {showPassword ?
-                      <Eye className='text-[#B8B8B8]' />
-                      : <EyeOff className='text-[#B8B8B8]' />
-
-                    }
-                  </button>
-                )
-              }
-
-            </div>
-          </FormControl>
-
-          <FormMessage />
-        </FormItem>
-      )}
-    />
-  );
-}
-
-export default CustomInput;
+)

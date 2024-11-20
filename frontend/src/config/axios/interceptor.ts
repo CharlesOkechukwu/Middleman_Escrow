@@ -8,6 +8,7 @@ const addTokenInterceptor = (config: any) => {
   const token = localStorage.getItem("token")
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
+    console.log(token)
   } else {
     console.warn("Token is missing, Authorization header not added.");
   }
