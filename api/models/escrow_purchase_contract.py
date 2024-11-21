@@ -18,3 +18,4 @@ class EscrowPurchaseContract(db.Model):
     total_amount = db.Column(db.Float, nullable=False)
     status = db.Column(db.String(300), nullable=False)
     items = db.relationship('EPCItem', backref='escrow_purchase_contract', lazy=True)
+    delivery_details = db.relationship('DeliveryDetails', backref='escrow_purchase_contract', lazy=True)
