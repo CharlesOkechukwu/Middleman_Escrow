@@ -46,10 +46,7 @@ const LoginPage: React.FC = () => {
   const onSubmit: SubmitHandler<FormField> = async (data) => {
     await login(data)
     navigate('/dashboard')
-    console.log(data)
-    setError('root', {
-      message: 'error message from backend'
-    })
+    // throw new Error()
   }
 
 
@@ -83,6 +80,7 @@ const LoginPage: React.FC = () => {
                     {...register('password')}
                     errorMsg={errors.password?.message}
                   />
+
                 </div>
                 <div className='w-full pt-2 flex justify-between items-center'>
                   <div className='flex items-center gap-2'>
@@ -93,10 +91,12 @@ const LoginPage: React.FC = () => {
                     Recover Password
                   </NavLink>
                 </div>
+
                 <Button variant='outline' type='submit' className={`rounded-[10px] h-[52px] text-18 w-full  border-[#5A5A5A] mt-[38px] text-[#5A5A5A] hover:bg-pry hover:text-white hover:border-none bg-inherit`}>
                   {isSubmitting ? <Loader className='animate-spin' /> : ' Log In'}
                 </Button>
               </form>
+
             </div>
           </section>
 
