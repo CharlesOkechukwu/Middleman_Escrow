@@ -5,9 +5,9 @@ from flask import request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from . import views
 from api.auth.utils import model_to_json
-from api.models import EscrowPurchaseContract, EPCItem, User
+from api.models import EscrowPurchaseContract, EPCItem, User, DeliveryDetails, DeliveryPhotos
 from api.app import db
-from .utils import model_with_date_to_json
+from .utils import model_with_date_to_json, upload_image, create_product_code
 
 
 
@@ -29,8 +29,9 @@ def add_epc():
     created_at = datetime.datetime.now()
     delivery_fee = data.get('delivery_fee')
     delivery_date = data.get('delivery_date')
-    total_amount = data.get('total_amount')
+    total_amount = delivery_fee
     status = 'pending'
+    items = data.get('items')
     epc = EscrowPurchaseContract(escrow_uid=escrow_uid, buyer_id=buyer_id, buyer_name=buyer_name,
                                  seller_id=seller_id, seller_name=seller_name, delivery_fee=delivery_fee,
                                  delivery_date=delivery_date, total_amount=total_amount, status=status)
@@ -40,7 +41,7 @@ def add_epc():
     except Exception as e:
         print(e)
         return jsonify({'status': 'error', 'message': 'An error occurred while creating Escrow Purchase Contract'}), 500
-    items = data.get('items')
+    
     for item in items:
         escrow_uid = epc.escrow_uid
         product_name = item.get('product_name')
@@ -49,9 +50,18 @@ def add_epc():
         price = item.get('price')
         total = item.get('total')
         description = item.get('description')
+        print(description)
+        if product_code is None:
+            product_code = create_product_code(product_name, user_id)
         epc_item = EPCItem(escrow_uid=escrow_uid, product_name=product_name, product_code=product_code, quantity=quantity,
                            price=price, total=total, description=description)
         try:
+            total_amount += total
+            escrow_charge = total_amount * 0.03
+            if escrow_charge > 5000:
+                escrow_charge = 5000
+            total_amount += escrow_charge
+            epc.total_amount = total_amount
             db.session.add(epc_item)
             db.session.commit()
         except Exception as e:
@@ -206,3 +216,65 @@ def edit_item(item_id):
     except Exception as e:
         print(e)
         return jsonify({'status': 'error', 'message': 'An error occurred while updating item'}), 500
+
+
+@views.route('/add/delivery_details/<escrow_uid>', methods=['POST'], strict_slashes=False)
+@jwt_required()
+def add_delivery_details(escrow_uid):
+    """Confirm delivery and upload delivery details."""
+    user_id = get_jwt_identity()
+    user = User.query.get(user_id)
+    if user is None:
+        return jsonify({'status': 'error', 'message': 'User not found'}), 404
+    
+    epc = EscrowPurchaseContract.query.filter_by(escrow_uid=escrow_uid).first()
+    if epc is None:
+        return jsonify({'status': 'error', 'message': 'Escrow Purchase Contract not found'}), 404
+    if epc.buyer_id != user_id:
+        return jsonify({'status': 'error', 'message': 'You are not authorized to confirm delivery for this Escrow Purchase Contract'}), 403
+    if epc.status != 'paid':
+        return jsonify({'status': 'error', 'message': 'Cannot confirm delivery for an unpaid Escrow Purchase Contract'}), 400
+    
+    dispatch_date = request.form.get('dispatch_date')
+    delivery_due_date = request.form.get('delivery_due_date')
+    delivery_location = request.form.get('delivery_location')
+    delivery_contact_number = request.form.get('delivery_contact_number')
+    photos = request.files.getlist('photos')
+    delivery_details = DeliveryDetails(escrow_uid=escrow_uid, dispatch_date=dispatch_date, delivery_due_date=delivery_due_date,
+                                       delivery_location=delivery_location, delivery_contact_number=delivery_contact_number)
+    try:
+        db.session.add(delivery_details)
+        db.session.commit()
+
+        for photo in photos:
+            photo_url = upload_image(photo)
+            delivery_photo = DeliveryPhotos(delivery_id=delivery_details.id, photo_url=photo_url, uploaded_by=user_id)
+            db.session.add(delivery_photo)
+            db.session.commit()
+    except Exception as e:
+        print(e)
+        return jsonify({'status': 'error', 'message': 'An error occurred while adding delivery details'}), 500
+    return jsonify({'status': 'success', 'message': 'Delivery details added successfully'}), 201
+
+
+@views.route('/delivery_details/<escrow_uid>', strict_slashes=False)
+@jwt_required()
+def get_delivery_details(escrow_uid):
+    """Get delivery details for an Escrow Purchase Contract."""
+    epc = EscrowPurchaseContract.query.filter_by(escrow_uid=escrow_uid).first()
+    if epc is None:
+        return jsonify({'status': 'error', 'message': 'Escrow Purchase Contract not found'}), 404
+    delivery_details = epc.delivery_details
+    if delivery_details is None:
+        return jsonify({'status': 'error', 'message': 'Delivery details not found'}), 404
+    photos = delivery_details.photos
+    photos = [model_with_date_to_json(photo) for photo in photos]
+    photos_data = []
+    for photo in photos:
+        photo = {'photo_id': photo['id'], 'photo_url': photo['photo_url'], 'uploaded_at': photo['uploaded_at'], 'uploaded_by': photo['uploaded_by']}
+        photos_data.append(photo)
+    delivery_details = model_with_date_to_json(delivery_details)
+    delivery_data = {'dispatch_date': delivery_details['dispatch_date'], 'delivery_due_date': delivery_details['delivery_due_date'],
+                     'delivery_location': delivery_details['delivery_location'], 'delivery_contact_number': delivery_details['delivery_contact_number'],
+                     'photos': photos_data}
+    return jsonify({'delivery_details': delivery_data}), 200

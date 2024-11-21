@@ -5,6 +5,7 @@ from . import views
 from api.auth.utils import model_to_json
 from api.models import Product, User, UserDetails, EscrowPurchaseOrder, EscrowOrderItem
 from api.app import db
+from .utils import create_product_code
 
 
 @views.route('/add_product', methods=['POST'], strict_slashes=False)
@@ -21,7 +22,7 @@ def add_product():
     if user_obj is None:
         return jsonify({'message': 'User not found'}), 404
     user = model_to_json(user_obj)
-    code = f"{name[:3]}-{user['id']}-{random.randint(100, 9999)}"
+    code = create_product_code(name, user['id'])
     product = Product(code=code, name=name, price=price, details=details, user_id=user['id'])
     try:
         db.session.add(product)

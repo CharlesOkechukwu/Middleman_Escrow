@@ -1,6 +1,7 @@
 """Module for all utility function for view routes"""
 import os
 import json
+import random
 from datetime import datetime
 from werkzeug.utils import secure_filename
 from flask import current_app
@@ -38,3 +39,9 @@ def model_with_date_to_json(obj):
             except TypeError:
                 data[field] = None
     return data
+
+
+def create_product_code(product_name, user_id):
+    """create product code from product name and user id."""
+    product_code = f"{product_name[:3].upper()}-{user_id}-{random.randint(1000, 9999)}"
+    return product_code
